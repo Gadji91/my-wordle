@@ -1,138 +1,217 @@
+
 const board = document.querySelector(".board");
 const h1 = document.querySelector(".h1");
 const menu = document.querySelector(".menu");
-const word = words[Math.floor(Math.random() * words.length)];
+const answer = document.querySelector(".answer");
 
-let currentCell = 0;
+const word = words[
+    Math.floor(Math.random() * words.length)
+].toLowerCase();
+
 let currentRow = 0;
 let letters = 0;
+let gameOver = false;
 
-// Создание клеток
+// Создаём поле: 6 строк по 5 клеток.
 for (let i = 0; i < 30; i++) {
     const cell = document.createElement("div");
     cell.classList.add("cell");
     board.appendChild(cell);
 }
 
-// Переменная каждой одной клетки
 const cells = document.querySelectorAll(".cell");
 
-// Делает так, чтобы клетка выделилась и в ней можно было писать
-cells[currentCell].classList.add("active");
-
-// Закругляет крайние клетки
+cells[0].classList.add("active");
 cells[0].classList.add("radius");
 cells[4].classList.add("radius2");
 cells[25].classList.add("radius3");
 cells[29].classList.add("radius4");
 
+// Индекс клетки всегда вычисляется из текущей строки
+// и количества введённых букв.
+function getCellIndex() {
+    return currentRow * 5 + letters;
+}
 
-document.addEventListener("click", function(event) {
-    const btn = event.target.closest(".key");  // нашли кнопку
-    if (!btn) return;                          // кликнули не по кнопке — выходим
+// Ввод буквы — единая функция для обеих клавиатур.
+function enterLetter(letter) {
+    if (gameOver || letters >= 5 || currentRow >= 6) {
+        return;
+    }
 
-    const letter = btn.textContent.trim().toLowerCase(); // текст кнопки
-    if (letter.length === 1  && letter !== "⌫") {                 // если это одна буква
+    const index = getCellIndex();
+    const cell = cells[index];
+
+    if (!cell) return;
+
+    cell.textContent = letter.toLowerCase();
+    cell.classList.remove("active");
+
+    letters++;
+
+    // Выделяем следующую клетку только внутри текущей строки.
+    if (letters < 5) {
+        cells[getCellIndex()].classList.add("active");
+    }
+}
+
+// Удаление последней введённой буквы.
+function deleteLetter() {
+    if (gameOver || letters <= 0) return;
+
+    letters--;
+
+    const index = getCellIndex();
+    const cell = cells[index];
+
+    cell.textContent = "";
+    cell.classList.remove("color1", "color2", "color3", "flip");
+    cells[index + 1].classList.remove("active");
+    cell.classList.add("active");
+}
+
+// Проверка слова и переход на следующую строку.
+function submitRow() {
+    if (gameOver || letters !== 5 || currentRow >= 6) {
+        return;
+    }
+
+    const rowStart = currentRow * 5;
+
+    const guess = Array.from(cells)
+        .slice(rowStart, rowStart + 5)
+        .map(cell => cell.textContent.toLowerCase());
+
+    const remaining = word.split("");
+
+    // Сначала отмечаем правильные буквы на своих местах.
+    for (let i = 0; i < 5; i++) {
+        if (guess[i] === remaining[i]) {
+            cells[rowStart + i].classList.add("color1");
+            remaining[i] = null;
+        }
+    }
+
+    // Затем отмечаем буквы, стоящие не на своих местах.
+    for (let i = 0; i < 5; i++) {
+        const cell = cells[rowStart + i];
+
+        if (cell.classList.contains("color1")) continue;
+
+        const index = remaining.indexOf(guess[i]);
+
+        if (index !== -1) {
+            cell.classList.add("color2");
+            remaining[index] = null;
+        } else {
+            cell.classList.add("color3");
+        }
+    }
+
+    // Анимация переворота клеток.
+    for (let i = 0; i < 5; i++) {
+        const cell = cells[rowStart + i];
+
+        setTimeout(() => {
+            cell.classList.add("flip");
+        }, i * 450);
+    }
+
+    // Победа.
+    if (guess.join("") === word) {
+        finishGame("Ты угадал слово!");
+        return;
+    }
+
+    // Переходим к следующей строке.
+    currentRow++;
+    letters = 0;
+
+    if (currentRow >= 6) {
+        finishGame("Правильный ответ:");
+        return;
+    }
+
+    // Новая позиция определяется только номером строки.
+    cells.forEach(cell => cell.classList.remove("active"));
+
+    const nextRowStart = currentRow * 5;
+    cells[nextRowStart].classList.add("active");
+}
+
+// Завершение игры.
+function finishGame(message) {
+    gameOver = true;
+
+    cells.forEach(cell => cell.classList.remove("active"));
+
+    h1.textContent = message;
+    answer.textContent = word;
+
+    menu.classList.add("show");
+    document.body.classList.add("dark");
+}
+
+// Экранная клавиатура.
+document.querySelector(".keyboard").addEventListener("click", event => {
+    const button = event.target.closest(".key");
+
+    if (!button || gameOver) return;
+
+    event.preventDefault();
+
+    if (button.classList.contains("key-enter")) {
+        submitRow();
+        return;
+    }
+
+    if (button.classList.contains("key-backspace")) {
+        deleteLetter();
+        return;
+    }
+
+    const letter = button.textContent.trim().toLowerCase();
+
+    if (/^[а-яё]$/i.test(letter)) {
         enterLetter(letter);
     }
 });
 
+// Физическая клавиатура использует те же функции.
+document.addEventListener("keydown", event => {
+    if (gameOver) return;
 
-function enterLetter(letter) {
-    if (letters < 5 && currentRow < 6) {
-        cells[currentCell].textContent = letter;
-        cells[currentCell].classList.remove("active");
-        currentCell++;
-        letters++;
-        if (letters < 5) cells[currentCell].classList.add("active");}
-}
-
-document.addEventListener("keydown", function (event) {
-    // Ввод буквы
-    if (event.key.length === 1 && letters < 5) {
-        cells[currentCell].textContent = event.key.toLowerCase();
-        cells[currentCell].classList.remove("active");
-        currentCell++;
-        letters++;
-        if (letters < 5) cells[currentCell].classList.add("active");
+    if (event.key === "Enter") {
+        event.preventDefault();
+        submitRow();
+        return;
     }
 
-    // Backspace
-    if (event.key === "Backspace" && letters > 0) {
-        letters--;
-        currentCell--;
-        cells[currentCell].textContent = "";
-        cells[currentCell + 1].classList.remove("active");
-        cells[currentCell].classList.add("active");
+    if (event.key === "Backspace") {
+        event.preventDefault();
+        deleteLetter();
+        return;
     }
 
-    // Enter
-    if (event.key === "Enter" && letters === 5) {
-         // Буквы игрока
-        const p = [];
-        for (let i = 0; i < 5; i++) {
-            p.push(cells[currentCell - 5 + i].textContent.toLowerCase());
-        }
-        // Копия загаданного слова
-        const w = [];
-        for (let i = 0; i < 5; i++) {
-            w.push(word[i]);
-        }
+    if (
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.repeat ||
+        event.key.length !== 1
+    ) {
+        return;
+    }
 
-        // Сначала ищем точные совпадения
-        for (let i = 0; i < 5; i++) {
-            if (p[i] === w[i]) {
-                const cellIndex = currentCell - 5 + i;
-                cells[cellIndex].classList.add("color1");
-                w[i] = null;
-            }
-        }
-
-        // Потом ищем буквы, которые есть в слове,
-        // но стоят не на своём месте
-        for (let i = 0; i < 5; i++) {
-            const cellIndex = currentCell - 5 + i;
-            if (cells[cellIndex].classList.contains("color1")) continue;
-            const index = w.indexOf(p[i]);
-
-            if (index !== -1) {
-                cells[cellIndex].classList.add("color2");
-                w[index] = null;
-            } else { cells[cellIndex].classList.add("color3");}
-        }
-
-        for (let i = 0; i < 5; i++) {
-            const cellIndex = currentCell - 5 + i;
-
-            setTimeout(() => {
-                cells[cellIndex].classList.add("flip");
-            }, i * 450); }
-
-        // Проверка победы
-        if (p.join("") === word) {
-            h1.textContent = "Ты угадал слово!";
-            document.querySelector(".answer").textContent = word;
-            menu.classList.add("show");
-            document.body.classList.add("dark");
-        }
-
-        // Переход на следующий ряд
-        letters = 0;
-        currentRow++;
-
-
-        if (currentRow < 6) {
-            cells[currentCell].classList.add("active");
-        } else {
-            document.querySelector(".answer").textContent = word;
-            h1.textContent = "Правильный ответ:";
-            menu.classList.add("show");
-            document.body.classList.add("dark");}
+    if (/^[а-яё]$/i.test(event.key)) {
+        enterLetter(event.key);
     }
 });
 
-document.querySelector(".restart").addEventListener("click", function () {
+// Перезапуск игры.
+document.querySelector(".restart").addEventListener("click", () => {
     location.reload();
 });
 
+// Показываем загаданное слово в заголовке вкладки.
 document.querySelector("title").textContent = word;
