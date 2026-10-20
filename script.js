@@ -46,6 +46,11 @@ function enterLetter(letter) {
 
     cell.textContent = letter.toLowerCase();
     cell.classList.remove("active");
+    cell.classList.add("pop");
+
+    setTimeout(() => {
+    cell.classList.remove("pop");
+}, 180);
 
     letters++;
 
@@ -66,23 +71,35 @@ function deleteLetter() {
 
     cell.textContent = "";
     cell.classList.remove("color1", "color2", "color3", "flip");
-    cells[index + 1].classList.remove("active");
+    cells[index+1].classList.remove("active");
     cell.classList.add("active");
 }
 
 // Проверка слова и переход на следующую строку.
 function submitRow() {
-    if (gameOver || letters !== 5 || currentRow >= 6) {
+    const rowStart = currentRow * 5;
+    const anim = rowStart + 5;
+
+    if (gameOver || currentRow >= 6) {
         return;
     }
 
-    const rowStart = currentRow * 5;
+    if (letters !== 5) {
+        Array.from(cells).slice(rowStart, anim).forEach(cell => {
+            cell.classList.remove("anim");
+            void cell.offsetWidth;
+            cell.classList.add("anim");
+        });
+
+        return;
+    }
 
     const guess = Array.from(cells)
         .slice(rowStart, rowStart + 5)
         .map(cell => cell.textContent.toLowerCase());
 
     const remaining = word.split("");
+
 
     // Сначала отмечаем правильные буквы на своих местах.
     for (let i = 0; i < 5; i++) {
