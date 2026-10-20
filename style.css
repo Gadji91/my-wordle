@@ -31,7 +31,7 @@ body.dark::before {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 4px;
-    width: min(90vw, 387px, 48vh);
+    width: min(90vw, 387px);
     perspective: 600px;
     justify-self: center;
 
@@ -39,10 +39,10 @@ body.dark::before {
 
 .cell {
     aspect-ratio: 1;
-    border: 2px solid #939696;
+    border: clamp(1px, 0.4vw, 2px) solid #939696;
     cursor: text;
     position: relative;
-    font-size: 30px;
+    font-size: font-size: clamp(18px, 5vw, 30px);
     display: grid;
     place-items: center;
     font-family: "Nunito", ui-sans-serif, system-ui, sans-serif;
@@ -54,7 +54,6 @@ body.dark::before {
 
 .cell.active {
     border: 2px solid #ad7171;
-    transform: scale(1.03)
 }
 
 .cell.radius{
@@ -88,7 +87,6 @@ border-radius:0 0 0 20px
     display: grid;
     gap: 10px;
     text-align: center;
-    transform: translateY(-35px);
 }
 
 .h{
@@ -104,10 +102,11 @@ font-family: Palatino Linotype;
     transform: translate(-50%, -46%) scale(0.95);
 
     width: min(85vw, 450px);
-    min-height: 360px;
-    padding: 26px 24px 35px;
+    min-height: (360px, 70dvh);
+    max-height: 90dvh;
+    padding: clamp(18px, 5vw, 26px) clamp(16px, 4vw, 24px) clamp(24px, 6vw, 35px);
     box-sizing: border-box;
-
+    overflow-y: auto;
     display: grid;
     place-content: center;
     gap: 10px;
@@ -146,7 +145,7 @@ font-family: Palatino Linotype;
 }
 
 .answer {
-    margin-bottom: 50px;
+    margin-bottom: clamp(24px, 8vw, 50px);
     font-family: Arial, sans-serif;
     font-size: 28px;
     font-weight: bold;
@@ -157,8 +156,8 @@ font-family: Palatino Linotype;
 
 
 .restart {
-    padding: 12px 24px;
-    width: 140%;
+    padding: clamp(10px, 3vw, 12px) clamp(16px, 5vw, 24px);
+    width: 100%;
     justify-self: center;
     box-sizing: border-box;
 
@@ -173,7 +172,7 @@ font-family: Palatino Linotype;
 
     cursor: pointer;
     transition: background 0.2s ease, transform 0.2s ease;
-    margin-top: 120px;
+    margin-top: clamp(40px, 12vw, 120px);
 }
 
 
@@ -235,27 +234,27 @@ font-family: Palatino Linotype;
 }
 
 .keyboard {
-    width: min(96vw, 520px, 65vh);
+    width: min(96vw, 520px);
     display: grid;
-    gap: 6px;
+    gap: clamp(4px, 1vw, 6px);
 }
 
 .keyboard-row {
     display: flex;
     justify-content: center;
-    gap: 4px;
+    gap: clamp(3px, 0.8vw, 4px);
 }
 
 .key {
     flex: 1;
     min-width: 0;
-    height: 48px;
+    height:clamp(38px, 9vw, 48px);;
     padding: 0;
     border: none;
     border-radius: 6px;
     background: #deded9;
     color: #292d2b;
-    font-size: 17px;
+    font-size: clamp(13px, 3.6vw, 17px);
     font-weight: bold;
     cursor: pointer;
     font-family: "Nunito", ui-sans-serif, system-ui, sans-serif;
