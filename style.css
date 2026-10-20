@@ -15,6 +15,10 @@ body{
     min-height: 100vh;
     display: grid;
     place-items: start center;
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 
@@ -56,18 +60,10 @@ body.dark::before {
     border: 2px solid #ad7171;
 }
 
-.cell.radius{
-border-radius:20px 0 0 0
-}
-.cell.radius2{
-border-radius:0 20px 0 0
-}
-.cell.radius4{
-border-radius:0 0 20px 0
-}
-.cell.radius3{
-border-radius:0 0 0 20px
-}
+.cell.radius  { border-radius: clamp(8px, 3vw, 20px) 0 0 0; }
+.cell.radius2 { border-radius: 0 clamp(8px, 3vw, 20px) 0 0; }
+.cell.radius3 { border-radius: 0 0 0 clamp(8px, 3vw, 20px); }
+.cell.radius4 { border-radius: 0 0 clamp(8px, 3vw, 20px) 0; }
 
 
 .cell.color1 {
@@ -271,7 +267,7 @@ background: rgba(0, 0, 0, 0.3);
 .key-enter,
 .key-backspace {
     flex: 1.5;
-    font-size: 13px;
+    font-size: clamp(11px, 2.8vw, 13px);;
 }
 
 @keyframes anim {
@@ -306,11 +302,12 @@ background: rgba(0, 0, 0, 0.3);
 
 .site-header {
     display:flex;
-    padding: 5px 0 5px;
+    padding: 5px env(safe-area-inset-right) 5px env(safe-area-inset-left);
     border-bottom: 1px solid #3a3a3c;
-    margin-bottom: 25px;
+    margin-bottom: clamp(12px, 3vw, 20px);
     width:95%;
     align-items:center;
+    box-sizing: border-box;
 }
 .developer {
 
